@@ -1,0 +1,172 @@
+const Food = require('../models/Food');
+const { search } = require('../routes/category');
+
+module.exports = {
+    // Add more food-related controller methods here in the future
+
+    addFood: async (req, res) => {
+        
+        const { title, time, foodTags, category, foodType, code, restaurant, description, price, additives, imageUrl } = req.body;
+        
+        if(!title || !time || !foodTags || !category || !foodType || !code || !restaurant || !description || !price || !imageUrl) {
+            return res.status(400).json({
+                status: false,
+                message: "Missing required fields"
+            });
+        }
+
+        try {
+            const newFood = new Food(req.body);
+            await newFood.save();
+            res.status(201).json({
+                status: true,
+                message: "Food has been created successfully"
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    },
+
+    getFoodById: async (req, res) => {
+        const foodId = req.params.id;
+        try {
+            const food = await Food.findById(foodId);
+            if (!food) {
+                return res.status(404).json({
+                    status: false,
+                    message: "Food not found"
+                });
+            }
+            res.status(200).json(food);
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    },
+    
+    getRandomFoods: async (req, res) => {
+        
+        const code = req.params.code;
+        try {
+            let randomFoods = [];
+            if(code) {
+                randomFoods = await Food.aggregate([
+                    { $match: { code: code, isAvailable : true }},
+                    { $sample: { size: 5 } },
+                    { $project: { __v: 0 } }
+                ]);
+            }
+            if(randomFoods.length === 0) {
+                randomFoods = await Food.aggregate([
+                    { $match: { isAvailable : true }},
+                    { $sample: { size: 5 } },
+                    { $project: { __v: 0 } }
+                ]);
+            }
+            res.status(200).json(randomFoods);
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    },
+    
+    // Restaurant Menu
+    getFoodsByRestaurant: async (req, res) => {
+        const restaurantId = req.params.restaurantId;
+        try {
+            const foods = await Food.find({ restaurant: restaurantId });
+            res.status(200).json(foods);
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    },
+
+    getFoodsByCategoryAndCode: async (req, res) => {
+        const { category, code } = req.params;
+        try {
+            const foods = await Food.aggregate([
+                { $match: { category: category, code: code, isAvailable : true }},
+                { $project: { __v: 0 } }
+            ]);
+
+            if(foods.length === 0) {
+                return res.status(200).json([]);
+            }
+
+            res.status(200).json(foods);
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    },
+
+    searchFoods: async (req, res) => {
+        const { search } = req.params.search;
+
+        try {
+            const results = await Food.aggregate([
+                {
+                    $search: {
+                        index: 'foods',
+                        text: {
+                            query: search,
+                            path: {
+                                wildcard: "*",
+                            },
+                        },
+                    },
+                }
+            ]);
+
+            res.status(200).json(results);
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    },
+
+    getRandomFoodsByCategoryAndCode: async (req, res) => {
+        const { category, code } = req.params;
+        try {
+            let foods = [];
+
+            foods = await Food.aggregate([
+                { $match: { category: category, code: code, isAvailable : true }},
+                { $sample: { size: 10 } }
+            ]);
+
+            if(!foods || foods.length === 0) {
+                foods = await Food.aggregate([
+                    { $match: { code: code, isAvailable : true }},
+                    { $sample: { size: 10 } }
+                ]);
+            } else if (!foods || foods.length < 10) {
+                foods = await Food.aggregate([
+                    { $match: { isAvailable : true }},
+                    { $sample: { size: 10 } }
+                ]);
+            }
+
+            res.status(200).json(foods);
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    },
+};
