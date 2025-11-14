@@ -6,7 +6,7 @@ module.exports = {
 
     addFood: async (req, res) => {
         
-        const { title, time, foodTags, category, foodType, code, restaurant, description, price, additives, imageUrl } = req.body;
+        const { title, time, foodTags, category, foodType, code, restaurant, description, price, imageUrl } = req.body;
         
         if(!title || !time || !foodTags || !category || !foodType || !code || !restaurant || !description || !price || !imageUrl) {
             return res.status(400).json({
@@ -51,24 +51,28 @@ module.exports = {
     
     getRandomFoods: async (req, res) => {
         
-        const code = req.params.code;
         try {
-            let randomFoods = [];
-            if(code) {
-                randomFoods = await Food.aggregate([
-                    { $match: { code: code, isAvailable : true }},
+            let randomFoodList = [];
+
+            if(req.params.code) {
+                randomFoodList = await Food.aggregate([
+                    { $match: { code: req.params.code }},
                     { $sample: { size: 5 } },
                     { $project: { __v: 0 } }
                 ]);
             }
-            if(randomFoods.length === 0) {
-                randomFoods = await Food.aggregate([
-                    { $match: { isAvailable : true }},
-                    { $sample: { size: 5 } },
-                    { $project: { __v: 0 } }
+
+            if(randomFoodList.length) {
+                randomFoodList = await Food.aggregate([
+                    { $sample: { size: 5 } }
                 ]);
             }
-            res.status(200).json(randomFoods);
+
+            if (randomFoodList.length) {
+                res.status(200).json(randomFoodList);
+            }else{
+                res.status(400).json({status: false, message: "No foods found"});
+            }
         } catch (error) {
             res.status(500).json({
                 status: false,

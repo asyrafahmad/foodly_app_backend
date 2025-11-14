@@ -7,7 +7,7 @@ const FoodSchema = new mongoose.Schema({
     category: {type: String, required: true},
     foodType: {type: Array, required: true},
     code: {type: String, required: true},
-    isAvailable: {type: boolean, default: true},
+    isAvailable: {type: Boolean, default: true},
     restaurant: {type: mongoose.Schema.Types.ObjectId, required: true},
     rating: {type: Number, min: 1, max: 5, default: 3},
     ratingCount: {type: String, default: "100"},
