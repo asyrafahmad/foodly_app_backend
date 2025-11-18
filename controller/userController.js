@@ -6,9 +6,7 @@ module.exports = {
     getUser: async (req, res) => {
 
         try {
-            const user = await User.findById(req.user.userId);
-
-            const { password, __v , createdAt, ...userData } = await user_doc;
+            const user = await User.findById(req.user.id);
 
             if (!user) {
                 return res.status(404).json({
@@ -16,7 +14,10 @@ module.exports = {
                     message: "User not found"
                 });
             }
-            res.status(200).json(user);
+
+            const { password, __v, otp, createdAt, ...userData } = user._doc;
+
+            res.status(200).json({ status: true, ...userData });
         } catch (error) {
             res.status(500).json({
                 status: false,
@@ -27,9 +28,11 @@ module.exports = {
 
     verifyAccount: async (req, res) => {
 
-        const userOtp = req.body.otp;
+        const userOtp = req.params.otp;
+
+        console.log("OTP received:", req.user);
         try {
-            const user = await User.findById(req.user.userId);
+            const user = await User.findById(req.user.id);
 
             if (!user) {
                 return res.status(400).json({
@@ -45,7 +48,7 @@ module.exports = {
                 });
             }
             
-            user.verification = true;
+            user.userVerification = true;
             user.otp = null;
             await user.save();
 
@@ -65,7 +68,7 @@ module.exports = {
         const phone =  req.params.phone;
 
         try {
-            const user = await User.findById(req.user.userId);
+            const user = await User.findById(req.user.id);
 
             if (!user) {
                 return res.status(400).json({
@@ -96,7 +99,7 @@ module.exports = {
     deleteUser: async (req, res) => {
 
         try {
-            await User.findByIdAndDelete(req.user.userId);
+            await User.findByIdAndDelete(req.user.id);
 
             return res.status(200).json({
                 status: true,

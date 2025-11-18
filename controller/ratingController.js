@@ -7,7 +7,7 @@ module.exports = {
     addRating: async (req, res) => {
 
         const newRating = new Rating({
-            userId: req.user.userId,
+            userId: req.user.id,
             ratingType: req.body.ratingType,
             product: req.body.product,
             rating: req.body.rating, 

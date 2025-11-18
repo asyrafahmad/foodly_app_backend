@@ -5,6 +5,7 @@ const generateOTP = require('../utils/otp_generator');
 const sendEmail =  require('../utils/smtp_email_function');
 
 module.exports = {
+    
     createUser: async (req, res) => {
         // Implementation for creating a user
 
@@ -118,11 +119,11 @@ module.exports = {
                 { expiresIn: '7d' }
             );
 
-            const {password, otp, ...others} = user.doc;
+            const {password, createdAt, updatedAt, __v , otp, ...others} = user._doc;
 
             res.status(200).json({
                 ...others,
-                token: userToken,
+                userToken: userToken,
                 status: true,
                 message: "Login successful"
             });
