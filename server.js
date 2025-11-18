@@ -3,6 +3,7 @@ const app = express()
 const dotenv = require('dotenv')
 const mongoose = require('mongoose');
 const AuthRoute = require("./routes/auth");
+const UserRoute = require("./routes/user");
 const CategoryRoute = require("./routes/category");
 const RestaurantRoute = require("./routes/restaurant");
 const FoodRoute = require("./routes/food");
@@ -22,7 +23,8 @@ mongoose.connect(process.env.MONGO_URL)
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use("/api/auth", AuthRoute);
+app.use("/", AuthRoute);
+app.use("/api/user", UserRoute);
 app.use("/api/category", CategoryRoute);
 app.use("/api/restaurant", RestaurantRoute);
 app.use("/api/foods", FoodRoute);
