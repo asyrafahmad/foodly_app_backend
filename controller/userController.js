@@ -1,0 +1,95 @@
+const User = require('../models/User');
+
+module.exports = {
+    // Controller methods for user operations can be added here if needed in the future
+
+    getUser: async (req, res) => {
+
+        try {
+            const user = await User.findById(req.user.userId);
+
+            const { password, __v , createdAt, ...userData } = await user_doc;
+
+            if (!user) {
+                return res.status(404).json({
+                    status: false,
+                    message: "User not found"
+                });
+            }
+            res.status(200).json(user);
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    },
+
+    verifyAccount: async (req, res) => {
+
+        const userOtp = req.body.otp;
+        try {
+            const user = await User.findById(req.user.userId);
+
+            if (!user) {
+                return res.status(400).json({
+                    status: false,
+                    message: "User not found"
+                });
+            }
+
+            if (user.otp !== userOtp) {
+                return res.status(400).json({
+                    status: false,
+                    message: "Invalid OTP"
+                });
+            }
+            
+            user.verification = true;
+            user.otp = null;
+            await user.save();
+
+            const {password, __v, otp, createdAt, ...others} = user._doc;
+            
+            // ...others = spread operator to exclude sensitive fields
+            res.status(200).json({...others});
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    },
+
+    verifyPhone: async (req, res) => {
+        const phone =  req.params.phone;
+
+        try {
+            const user = await User.findById(req.user.userId);
+
+            if (!user) {
+                return res.status(400).json({
+                    status: false,
+                    message: "User not found"
+                });
+            }
+
+            user.phoneVerification = true;
+            user.phone = phone;
+            
+            await user.save();
+
+            const {password, __v, otp, createdAt, ...others} = user._doc;
+            
+            // ...others = spread operator to exclude sensitive fields
+            res.status(200).json({...others});
+            
+           
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    }
+};
