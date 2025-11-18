@@ -5,7 +5,7 @@ const generateOTP = require('../utils/otp_generator');
 const sendEmail =  require('../utils/smtp_email_function');
 
 module.exports = {
-    createIUser: async (req, res) => {
+    createUser: async (req, res) => {
         // Implementation for creating a user
 
         const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
