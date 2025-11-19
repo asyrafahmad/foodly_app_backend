@@ -9,6 +9,7 @@ const RestaurantRoute = require("./routes/restaurant");
 const FoodRoute = require("./routes/food");
 const RatingRoute = require("./routes/rating");
 const addressRoute = require("./routes/address");
+const cartRoute = require("./routes/cart");
 // const generateOTP = require('./utils/otp_generator');
 // const sendEmail =  require('./utils/smtp_email_function');
 
@@ -31,6 +32,7 @@ app.use("/api/restaurant", RestaurantRoute);
 app.use("/api/foods", FoodRoute);
 app.use("/api/rating", RatingRoute);
 app.use("/api/address", addressRoute);
+app.use("/api/cart", cartRoute);
 
 
 

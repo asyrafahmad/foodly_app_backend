@@ -17,7 +17,7 @@ module.exports = {
 
         try {
             const existingProduct = await Cart.findOne({ userId: userId, productId: productId});
-            count = await Cart.countDocuments({ userId: userId });
+            let count = await Cart.countDocuments({ userId: userId });
 
             if (existingProduct) {
 
@@ -42,7 +42,7 @@ module.exports = {
                 });
 
                 await newCartItem.save();
-                count += await Cart.countDocuments({ userId: userId });
+                count = await Cart.countDocuments({ userId: userId });
 
                 return res.status(201).json({
                     status: true,
@@ -75,7 +75,7 @@ module.exports = {
                 });
             }
             
-            await Cart.findByIdAndDelete({_id, cartItemId});
+            await Cart.findByIdAndDelete(cartItemId);
 
             const count = await Cart.countDocuments({ userId: userId });
 
@@ -126,6 +126,49 @@ module.exports = {
                 status: true, 
                 count: count 
             });
+        } catch (error) {
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
+        }
+    },
+
+    decrementProductQuantity: async (req, res) => {
+
+        const userId = req.user.id;
+        const productId = req.params.id;
+
+        try {
+            const cartItem = await Cart.findById(productId);
+            if (!cartItem) {
+                return res.status(404).json({
+                    status: false,
+                    message: "Cart item not found"
+                });
+            } else {
+                const productPrice = cartItem.totalPrice / cartItem.quantity;
+                
+                if(cartItem.quantity > 1) {
+                    cartItem.quantity -= 1;
+                    cartItem.totalPrice -= productPrice;
+                    await cartItem.save();
+
+                    return res.status(200).json({
+                        status: true,
+                        message: "Product quantity decremented",
+                        data: cartItem
+                    });
+                }
+                else {
+                    await Cart.findByIdAndDelete({_id: productId});
+                    
+                    return res.status(200).json({
+                        status: true,
+                        message: "Product removed from cart as quantity reached zero"
+                    });
+                }
+            }
         } catch (error) {
             res.status(500).json({
                 status: false,
