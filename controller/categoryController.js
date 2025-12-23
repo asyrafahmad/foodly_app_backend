@@ -44,7 +44,8 @@ module.exports = {
             // Second argument to `find` is the projection: { __v: 0 } excludes the
             // Mongoose internal version key from the returned documents.
             // The query uses $ne (not equal) to filter out documents with title 'More'.
-            const categories = await Category.find({ title: { $ne: "More" } }, { __v: 0 });
+            // const categories = await Category.find({ title: { $ne: "More" } }, { __v: 0 });
+            const categories = await Category.find({ __v: 0 });
 
             // Respond with the array of categories and HTTP 200 OK
             res.status(200).json(categories);

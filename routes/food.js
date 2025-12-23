@@ -9,5 +9,6 @@ router.get("/search/:search", getFoodController.searchFoods);
 router.get("/restaurant-foods/:id", getFoodController.getFoodsByRestaurant);
 router.get("/:category/:code", getFoodController.getFoodsByCategoryAndCode);
 router.get("/recommendation/:code", getFoodController.getRandomFoods);
+router.get("/byCode/:code", getFoodController.getAllFoodsByCode);
 
 module.exports = router;
